@@ -1,6 +1,7 @@
 package main
 
 import (
+	//"os"
 	"fmt"
 	"log"
 	"net/http"
@@ -8,10 +9,16 @@ import (
 	"github.com/mhhussain/goflow/router"
 )
 
+var port int
+
 func main() {
-	fmt.Printf("hi\n")
+
+	//port = os.Getenv("SERVICE_PORT")
+	port = 110
+	servePort := fmt.Sprintf(":%d", port)
 
 	rtr := router.GetRouter()
 
-	log.Fatal(http.ListenAndServe(":110", rtr))
+	fmt.Printf("Listening on port %s", servePort)
+	log.Fatal(http.ListenAndServe(servePort, rtr))
 }
