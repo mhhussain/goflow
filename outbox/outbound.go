@@ -13,7 +13,7 @@ type Outbound struct {
 type Request struct {
 	Verb        string      `json:"verb"`
 	ServiceLink string      `json:"serviceLink"`
-	Headers     interface{} `json:"headers,omitempty"`
+	Headers     interface{} `json:"headers"`
 	Body        interface{} `json:"body"`
 }
 

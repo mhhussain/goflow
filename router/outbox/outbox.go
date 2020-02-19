@@ -1,28 +1,28 @@
 package outbox
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
 
 	"github.com/mhhussain/goflow/outbox"
 )
 
 func OutboxRouteHandler(w http.ResponseWriter, r *http.Request) {
-	out := outbox.Outbound{
-		"test",
-		outbox.Request{
-			"GET",
-			"http://buckets-dev.xby2-rnd.com/buckets/drop-four/testfile0009110000000",
-			nil,
-			`{"hello":"world"}`,
-		},
+	var incomingReq outbox.Outbound
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&incomingReq); err != nil {
+		resp, _ := json.Marshal("invalid request")
+		w.WriteHeader(500)
+		w.Write(resp)
+		return
 	}
 
 	// create response channel
 	respchan := make(chan outbox.Response)
 
 	outbound := outbox.OutboundRequest{
-		out,
+		incomingReq,
 		&respchan,
 	}
 
@@ -31,6 +31,8 @@ func OutboxRouteHandler(w http.ResponseWriter, r *http.Request) {
 
 	// wait on response channel
 	x := <-respchan
+	w.WriteHeader(200)
+	w.Write(x.Body.([]byte))
 
-	fmt.Printf("done: %#v\n", string(x.Body.([]byte)))
+	//fmt.Printf("done: %#v\n", string(x.Body.([]byte)))
 }
