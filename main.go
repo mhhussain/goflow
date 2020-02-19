@@ -7,6 +7,7 @@ import (
 	//"net/http"
 
 	//"github.com/mhhussain/goflow/router"
+	"github.com/mhhussain/goflow/outbox"
 )
 
 var port int
@@ -23,28 +24,6 @@ outbound = {
 
 */
 
-type Outbound struct {
-	Caller	string	`json:"caller"`
-	Request	Request	`json:"request"`
-}
-
-type OutboundRequest struct {
-	Outbound	Outbound
-	RespChan	*chan Response
-}
-
-type Request struct {
-	ServiceLink		string		`json:"serviceLink"`
-	Headers			interface{}	`json:"headers,omitempty"`
-	Body			interface{} `json:"body"`
-}
-
-type Response struct {
-	Body	interface{}	`json:"body"`
-}
-
-var q = make(chan OutboundRequest, 1)
-
 func main() {
 
 	//port = os.Getenv("SERVICE_PORT")
@@ -56,36 +35,28 @@ func main() {
 	fmt.Printf("Listening on port %s", servePort)
 	log.Fatal(http.ListenAndServe(servePort, rtr))*/
 
+	outbox.ProcessOutbox()
+
 	fmt.Println("world")
 
-	out := Outbound{
+	out := outbox.Outbound{
 		"test",
-		Request{
+		outbox.Request{
 			"",
 			nil,
 			"helloworld",
 		},
 	}
 
-	respchan := make(chan Response)
+	respchan := make(chan outbox.Response)
 
-	outbound := OutboundRequest{
+	outbound := outbox.OutboundRequest{
 		out,
 		&respchan,
 	}
 
-	q <- outbound
-
-	go func() {
-		a := <- q
-		fmt.Printf("in: %s\n", a.Outbound.Caller)
-
-		rr := Response{
-			"",
-		}
-		*(a.RespChan) <- rr
-	}()
-
+	outbox.Box <- outbound
+	
 	x := <- respchan
 
 	fmt.Printf("done: %#v\n", x.Body)
