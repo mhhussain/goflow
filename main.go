@@ -12,18 +12,6 @@ import (
 
 var port int
 
-/*
-outbound = {
-	caller: 'service',
-	request: {
-		serviceLink: '',
-		headers: {},
-		body: {}
-	}
-}
-
-*/
-
 func main() {
 
 	//port = os.Getenv("SERVICE_PORT")
@@ -42,9 +30,10 @@ func main() {
 	out := outbox.Outbound{
 		"test",
 		outbox.Request{
-			"",
+			"GET",
+			"http://buckets-dev.xby2-rnd.com/buckets/drop-four/testfile0009110000000",
 			nil,
-			"helloworld",
+			`{"hello":"world"}`,
 		},
 	}
 
@@ -56,8 +45,8 @@ func main() {
 	}
 
 	outbox.Box <- outbound
-	
-	x := <- respchan
 
-	fmt.Printf("done: %#v\n", x.Body)
+	x := <-respchan
+
+	fmt.Printf("done: %#v\n", string(x.Body.([]byte)))
 }
