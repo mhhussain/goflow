@@ -1,8 +1,8 @@
 package ping
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 )
 
 const (
